@@ -1,13 +1,27 @@
-# Financial Time-Series Machine Learning Project
+# Financial Time-Series Transformer
 
-The Python script `data_prep.py` prepares financial time-series data as rolling sequences suitable for machine learning models. The current implementation focuses on constructing a clean, validated dataset from historical data.
+A transformer-based model for predicting next-day returns from historical AAPL OHLCV data. Currently contains the data preparation pipeline; model training will follow.
 
-The script downloads daily OHLCV data using `yfinance` and computes simple return-based features:
+## Setup
 
-- Daily return
-- 5-day rolling mean of returns
-- 5-day rolling standard deviation of returns
+```bash
+pip install -r requirements.txt
+```
 
-It constructs rolling input sequences of fixed length, defines prediction targets as next-day returns, and performs structural validation checks on the resulting datasets. 
+## Usage
 
-This repository currently contains only the data preparation pipeline.
+**Prepare data**
+```bash
+python data_prep.py
+```
+Downloads daily AAPL OHLCV data via `yfinance`, computes return-based features, normalises features using train-set statistics, and saves train/val/test splits to `data/splits.npz`.
+
+## Data
+
+| Setting | Value |
+|---------|-------|
+| Ticker | AAPL |
+| Sequence length | 30 days |
+| Features | `ret` (raw), `ret_mean`, `ret_std`, `Volume` (normalised) |
+| Target | Next-day return |
+| Split | 70% train / 15% val / 15% test |

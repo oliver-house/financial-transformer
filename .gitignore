@@ -13,6 +13,8 @@ dist/
 *.egg-info/
 
 # Generated outputs
+data/
+runs/
 outputs/
 *.pdf
 *.json
