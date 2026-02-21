@@ -8,7 +8,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import matplotlib
-matplotlib.use('Agg')          # headless — no display required
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from model import TinyTransformer
@@ -20,9 +20,9 @@ SEED        = 42
 BATCH_SIZE  = 256
 LR          = 1e-3
 EPOCHS      = 50
-PATIENCE    = 5          # early-stopping patience (set to EPOCHS to disable)
-IDX_RET     = 0          # index of 'ret' in FEAT_COLS
-PLOT_N      = 200        # number of test points shown in the line plot
+PATIENCE    = 5
+IDX_RET     = 0
+PLOT_N      = 200
 
 def set_seed(seed=SEED):
     random.seed(seed)
@@ -59,10 +59,10 @@ def evaluate_baselines(X_test, y_test):
     """Return metrics dict for both baselines and print them."""
     y = torch.from_numpy(y_test)
 
-    zero_preds    = torch.zeros_like(y)
+    zero_preds = torch.zeros_like(y)
     persist_preds = torch.from_numpy(X_test[:, -1, IDX_RET])
 
-    zero_metrics    = compute_metrics(zero_preds, y)
+    zero_metrics = compute_metrics(zero_preds, y)
     persist_metrics = compute_metrics(persist_preds, y)
 
     print_report('Zero baseline',        zero_metrics)
@@ -110,7 +110,6 @@ def save_plot(run_dir, true, pred, n):
 
     fig, axes = plt.subplots(2, 1, figsize=(12, 7))
 
-    # Top: line plot — true vs predicted over time
     ax = axes[0]
     ax.plot(xs, true, label='True return', linewidth=0.9, alpha=0.85)
     ax.plot(xs, pred, label='Predicted return', linewidth=0.9, alpha=0.85, linestyle='--')
@@ -120,7 +119,6 @@ def save_plot(run_dir, true, pred, n):
     ax.legend()
     ax.grid(True, linewidth=0.4)
 
-    # Bottom: scatter — pred vs true
     ax = axes[1]
     ax.scatter(true, pred, s=6, alpha=0.4)
     lim = max(np.abs(true).max(), np.abs(pred).max()) * 1.05
@@ -179,12 +177,10 @@ def main():
     X_test,  y_test  = data['X_test'],  data['y_test']
     print(f'Splits — train: {len(y_train)}, val: {len(y_val)}, test: {len(y_test)}')
 
-    # DataLoaders
     train_loader = DataLoader(ReturnDataset(X_train, y_train), batch_size=BATCH_SIZE, shuffle=True)
     val_loader   = DataLoader(ReturnDataset(X_val,   y_val),   batch_size=BATCH_SIZE)
     test_loader  = DataLoader(ReturnDataset(X_test,  y_test),  batch_size=BATCH_SIZE)
 
-    # Model
     d_features = X_train.shape[2]
     seq_len    = X_train.shape[1]
     model_cfg  = dict(d_features=d_features, seq_len=seq_len, d_model=32, n_heads=4, dropout=0.1, pool='last')
@@ -193,11 +189,10 @@ def main():
     optimizer = torch.optim.AdamW(model.parameters(), lr=LR)
     criterion = nn.MSELoss()
 
-    # Training
     print(f'\nTraining for up to {EPOCHS} epochs (patience={PATIENCE}) ...\n')
     best_val_loss = float('inf')
-    best_state    = None
-    patience_ctr  = 0
+    best_state = None
+    patience_ctr = 0
 
     for epoch in range(1, EPOCHS + 1):
         train_loss = train_epoch(model, train_loader, optimizer, criterion, device)
@@ -217,18 +212,15 @@ def main():
                 print(f'\nEarly stopping at epoch {epoch} (no improvement for {PATIENCE} epochs).')
                 break
 
-    # Restore best weights
     if best_state is not None:
         model.load_state_dict(best_state)
 
-    # Evaluation report
     print('\n--- Test-set evaluation ---')
     baseline_metrics = evaluate_baselines(X_test, y_test)
     _, test_preds, test_targets = evaluate(model, test_loader, criterion, device)
     transformer_metrics = compute_metrics(test_preds, test_targets)
     print_report('Transformer', transformer_metrics)
 
-    # Save artefacts
     print()
     save_metrics(
         run_dir=RUNS_DIR,
@@ -238,11 +230,7 @@ def main():
         baseline_metrics=baseline_metrics,
         transformer_metrics=transformer_metrics,
     )
-    save_plot(
-        run_dir=RUNS_DIR,
-        true=test_targets.numpy(),
-        pred=test_preds.numpy(),
-    )
+    save_plot(run_dir=RUNS_DIR, true=test_targets.numpy(), pred=test_preds.numpy(), n=PLOT_N)
 
 if __name__ == '__main__':
     main()

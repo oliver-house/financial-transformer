@@ -36,9 +36,7 @@ Trains a `TinyTransformer` on the prepared splits, evaluates against zero and pe
 
 | Setting | Value |
 |---------|-------|
-| Architecture | Single-layer transformer encoder |
-| `d_model` | 32 |
-| `n_heads` | 4 |
+| Architecture | TinyTransformer |
 | Pooling | Last token |
 | Optimiser | AdamW, lr=1e-3 |
 | Batch size | 256 |
