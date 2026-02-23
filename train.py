@@ -12,10 +12,10 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from model import TinyTransformer
+from data_prep import TICKERS
 
 DATA_PATH   = 'data/splits.npz'
 RUNS_DIR    = 'runs'
-TICKER      = 'AAPL'
 SEED        = 42
 BATCH_SIZE  = 256
 LR          = 1e-3
@@ -72,7 +72,6 @@ def evaluate_baselines(X_test, y_test):
 
 def save_metrics(
     run_dir,
-    ticker,
     seq_len,
     model_cfg,
     baseline_metrics,
@@ -81,7 +80,7 @@ def save_metrics(
     os.makedirs(run_dir, exist_ok=True)
     payload = {
         'timestamp': datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        'ticker':    ticker,
+        'tickers':   TICKERS,
         'seq_len':   seq_len,
         'config': {
             'batch_size': BATCH_SIZE,
@@ -224,7 +223,6 @@ def main():
     print()
     save_metrics(
         run_dir=RUNS_DIR,
-        ticker=TICKER,
         seq_len=seq_len,
         model_cfg=model_cfg,
         baseline_metrics=baseline_metrics,
